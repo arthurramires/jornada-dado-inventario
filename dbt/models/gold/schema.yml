@@ -1,0 +1,74 @@
+version: 2
+
+models:
+  - name: fato_bem_inventariado
+    description: >
+      Uma linha por bem ativo em carga, por exercício. Diz se o bem foi localizado na própria
+      área, em outra área ou não foi localizado, com a última leitura e o valor. É a tabela
+      que responde a taxa de localização do inventário.
+    columns:
+      - name: exercicio
+        data_tests:
+          - not_null
+      - name: numero_patrimonio
+        description: Número da plaqueta. Junto com exercicio identifica a linha.
+        data_tests:
+          - not_null
+      - name: area_carga_id
+        description: Área onde o bem deveria estar (papel "carga" da dim_area).
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_area')
+                field: area_id
+      - name: area_leitura_id
+        description: Área onde o bem foi lido por último (papel "leitura" da dim_area). Nula quando não foi lido.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_area')
+                field: area_id
+      - name: origem_leitura
+        description: Origem da última leitura. Nula quando o bem não foi lido.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_origem_leitura')
+                field: origem_leitura
+      - name: situacao_inventario
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Localizado', 'Localizado em outra área', 'Não localizado']
+      - name: valor_atual
+        data_tests:
+          - not_null
+
+  - name: dim_area
+    description: Áreas do SGM com comarca e região, mais a linha -1 para área não cadastrada.
+    columns:
+      - name: area_id
+        data_tests:
+          - not_null
+          - unique
+      - name: comarca
+        data_tests:
+          - not_null
+      - name: regiao
+        data_tests:
+          - not_null
+
+  - name: dim_origem_leitura
+    description: As origens oficiais de leitura e se a captura foi automática ou digitada.
+    columns:
+      - name: origem_leitura
+        data_tests:
+          - not_null
+          - unique
+      - name: tipo_captura
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Leitura automática', 'Digitação', 'Não informado']
