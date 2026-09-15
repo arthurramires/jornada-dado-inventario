@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: qrt_leituras_rejeitadas
+    description: >
+      Leituras que não casam com nenhum bem ativo da carga. Ficam guardadas com o motivo
+      para a Coordenadoria tratar, em vez de sumirem do pipeline.
+    columns:
+      - name: id_leitura
+        data_tests:
+          - not_null
+          - unique
+      - name: motivo
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['patrimonio_ausente', 'fora_da_carga']

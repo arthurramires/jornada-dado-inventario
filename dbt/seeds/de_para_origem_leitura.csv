@@ -1,0 +1,9 @@
+origem_recebida,origem_leitura,tipo_captura
+leitor_codigo_barras,leitor_codigo_barras,Leitura automática
+celular,celular,Leitura automática
+scanner,celular,Leitura automática
+mobile_celular,celular,Leitura automática
+mobile_scanner,celular,Leitura automática
+manual,manual,Digitação
+mobile_manual,manual,Digitação
+nao_informada,nao_informada,Não informado

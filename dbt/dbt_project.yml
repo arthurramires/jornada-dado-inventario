@@ -1,0 +1,24 @@
+name: inventario_patrimonial
+profile: inventario_patrimonial
+version: 1.0.0
+config-version: 2
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+models:
+  inventario_patrimonial:
+    +materialized: external
+    +format: parquet
+
+seeds:
+  inventario_patrimonial:
+    +column_types:
+      origem_recebida: varchar
+      origem_leitura: varchar
+      tipo_captura: varchar
+
+flags:
+  require_generic_test_arguments_property: true

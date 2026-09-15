@@ -1,0 +1,83 @@
+version: 2
+
+models:
+  - name: stg_areas
+    description: Áreas da planilha da Coordenadoria, com tipo e comarca padronizados e uma linha por código.
+    columns:
+      - name: codigo_area
+        description: Código da área no SGM.
+        data_tests:
+          - not_null
+          - unique
+      - name: tipo_area
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Judicial', 'Administrativa']
+      - name: comarca
+        description: Nome da comarca sem o prefixo "Comarca de". Nulo para áreas administrativas.
+      - name: regiao
+        description: Circunscrição da comarca. Nula para áreas administrativas e quando a planilha está em branco.
+
+  - name: stg_carga_patrimonial
+    description: Bens em carga por área e exercício, tipados e sem linhas repetidas.
+    columns:
+      - name: exercicio
+        data_tests:
+          - not_null
+      - name: numero_patrimonio
+        description: Número da plaqueta, só dígitos.
+        data_tests:
+          - not_null
+      - name: valor_atual
+        data_tests:
+          - not_null
+      - name: situacao_bem
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['ATIVO', 'BAIXADO']
+      - name: codigo_area_carga
+        description: >
+          Área responsável pelo bem. Pode apontar para uma área que não está na planilha
+          (área extinta). O teste avisa sem travar o build: a fato trata esses bens com a
+          linha "Área não cadastrada" da dim_area.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_areas')
+                field: codigo_area
+              config:
+                severity: warn
+
+  - name: stg_leituras
+    description: Leituras do app de coleta, tipadas, sem reenvios e com a origem traduzida pelo de-para.
+    columns:
+      - name: id_leitura
+        data_tests:
+          - not_null
+          - unique
+      - name: coletado_em
+        description: Data e hora da leitura. Os dois formatos da origem são convertidos aqui.
+        data_tests:
+          - not_null
+      - name: codigo_area
+        description: Área selecionada pelo coletor no momento da leitura.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_areas')
+                field: codigo_area
+              config:
+                severity: warn
+      - name: origem_recebida
+        description: >
+          Origem como chegou do app, só com caixa e espaços ajustados. Se o app começar a
+          mandar um valor que não está no de-para, este teste quebra o build de propósito.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('de_para_origem_leitura')
+                field: origem_recebida

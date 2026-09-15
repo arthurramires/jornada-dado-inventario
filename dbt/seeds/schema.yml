@@ -1,0 +1,18 @@
+version: 2
+
+seeds:
+  - name: de_para_origem_leitura
+    description: >
+      De-para dos valores de origem que o app de coleta já mandou ao longo do tempo para as
+      três origens oficiais (manual, celular, leitor_codigo_barras). Mudança aqui é decisão
+      da área de negócio, não de quem escreve SQL.
+    columns:
+      - name: origem_recebida
+        data_tests:
+          - not_null
+          - unique
+      - name: origem_leitura
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['manual', 'celular', 'leitor_codigo_barras', 'nao_informada']

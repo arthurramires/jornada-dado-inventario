@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: >
+      Tabelas Delta gravadas pela ingestão em data/bronze. Tudo chega como texto, do jeito
+      que veio da origem, mais as colunas _arquivo_origem e _ingerido_em.
+    config:
+      meta:
+        external_location: "delta_scan('../data/bronze/{name}')"
+    tables:
+      - name: areas
+        description: Planilha de áreas mantida pela Coordenadoria de Patrimônio (xlsx, editada à mão).
+      - name: carga_patrimonial
+        description: Export do SGM com os bens em carga de cada área na abertura do inventário (csv com ponto e vírgula, latin-1).
+      - name: leituras_coleta
+        description: Leituras do app de coleta, uma linha por leitura. Chega em lotes JSON; cada lote é uma versão da tabela.
