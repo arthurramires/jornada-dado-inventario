@@ -1,0 +1,56 @@
+name: pipeline
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Zerar as camadas
+        run: python scripts/zerar.py --sim
+
+      - name: Ingestão (raw -> bronze)
+        run: python -m src.pipeline
+
+      - name: Ingestão de novo (não pode criar versão)
+        run: |
+          python -m src.pipeline 2>&1 | tee segunda_ingestao.log
+          grep -q "0 commit(s) novo(s)" segunda_ingestao.log
+
+      - name: dbt build
+        working-directory: dbt
+        run: dbt build
+
+      - name: dbt docs generate
+        working-directory: dbt
+        run: dbt docs generate
+
+      - name: Testes da ingestão
+        run: pytest
+
+      - name: Resposta
+        run: python scripts/consultar.py consultas/resposta.sql
+
+      - name: Time travel
+        run: python scripts/time_travel.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dbt-docs
+          path: |
+            dbt/target/index.html
+            dbt/target/manifest.json
+            dbt/target/catalog.json
